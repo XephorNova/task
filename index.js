@@ -55,13 +55,7 @@ fs.writeFileSync("./preparedData.json", JSON.stringify(obj2, null, 2), "utf-8");
 
 let schedule = [];
 
-let sum = 0;
-
-sorted1.forEach((data) => {
-  sum += data.no_of_unpublished_tales;
-});
-
-function publish_new(publishArray, days) {
+function publish(publishArray, days) {
   let day = {
     post: [],
     day_number: 0,
@@ -110,9 +104,8 @@ function publish_new(publishArray, days) {
 
 data1 = sorted1;
 for (let i = 1; i < 31; i++) {
-  data1 = publish_new(data1, i);
+  data1 = publish(data1, i);
 }
 
 console.log(JSON.stringify(schedule, null, 4));
-
-console.log(sum);
+fs.writeFileSync("./schedule.json", JSON.stringify(schedule, null, 2), "utf-8");
