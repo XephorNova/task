@@ -1,0 +1,63 @@
+
+// convert csv file into json as the format given below
+SET WRITER_DATA = [{
+  writer_id: "<--writer-id-->",
+  tale_ids: [
+    "1654641646471",
+    "1654641646473"
+  ],
+  no_of_tales: 2,
+  // `no_of_unpublished_tales` is maximum number tales that can be published for this author it depends on the sum of total number tales submitted by the all authors, 
+  // and total number tales that can be published in a month
+  // multiplication_factor = capacity_of_publishing / sum_of_total_number_tales_submitted
+  // no_of tales_published_tales = no_of_tales * multiplication_factor
+  no_of_unpublished_tales: Math.floor(dataObject.no_of_tales * (300 / objArray.length)) === 0
+  ? 1
+  : Math.floor(dataObject.no_of_tales * (300 / objArray.length)) 
+}, ...]
+
+// sort the array in descending order of no_of_tales
+
+SET SCHEDULE = [];
+function func(INPUT_ARRAY, DAYS) {
+  INIT day = { ---> // SHOWS SCHEDULE OF PARTICULAR DAY
+    post: [], ---> // ARRAY OF TALES TO BE PUBLISHED IN A DAY
+    day_number: 0, ---> // DAY NUMBER OF MONTH
+  }; 
+  INIT i = 0; // THIS IS COUNT OF TALES GETTING PUBLISHED IN LOOP
+  INIT j = 0 // THIS TRAVESES THROUGH THE ARRAY GIVEN IN INPUT
+  while (i < 10) { // WHILE NUMBER OF TALES PUBLISHED IS LESS THAN 10
+    INIT posts = {
+      writer_id: "",
+      tale_id: "",
+      no_of_tales_published_till_date: 0,
+    };
+    if (INPUT_ARRAY[j].no_of_unpublished_tales > 0) {  ---> // ONLY TAKING WRITERS WITH WHO HAVE SOME TALES WHICH ARE NOT PUBLISHED
+      INPUT_ARRAY[j].published_tales.push(INPUT_ARRAY[j].tale_ids.pop()) ---> // TAKING OUT TALE ID FROM ARRAY OF TALE-ID AND INSERTING IT IN PUBLISHED TALES ARRAY
+      DECREMENT INPUT_ARRAY[j].no_of_unpublished_tales ---> // DECREASING THE COUNT OF UNPUBLISHED TALES
+      INCREMENT INPUT_ARRAY[j].published = INPUT_ARRAY[j].published + 1 ---> // INCREASING THE COUNT OF PUBLISHED TALE
+      // CREATING SCHEDULE FOR THE DAY
+      // SET WRITER ID, TALE-ID AND PUBLISHED TALE COUNT OF CURRENT DOCUMENT IN `posts`
+      // INSERT THE POST OBJECT IN DAY.post ARRAY ALSO SET THE DAY NUMBER RECIEVED FROM FUNCTION PARAMETER
+      // INSERT THE DAY OBJECT IN SCHEDULE ARRAY FOR SCHEDULE OF THE DAY
+      INCREMENT i; // INCREASE THE COUNT OF PUBLISHED TALES FOR THE DAY
+      INCREMENT j; // INCREASE THE COUNT OF ITERATOR
+    } else { ---> // IF NUMBER OF PUBLISHED TALES IN CURRENT DOCUMENT IS NOT GREATER THAN 0, THAN ONLY INCREASE ITERATOR
+      INCREMENT j;
+    }
+  }
+  INSERT `day` in SCHEDULE ARRAY for SCHEDULE OF PARTICULAR DAY
+  INPUT_ARRAY = FILTER_UNPUBLISHED(INPUT_ARRAY) // FILTER OUT ALL THE ELEMENT WHERE NUMBER OF IN PUBLISHED TALES IS GREATER THAN ZERO
+
+  // SORTING BELOW IS MADE SUCH A WAY SO THAT IT ALL WAYS TAKES DOCUMENT WHICH HAVE LOWEST PUBLISHED ON AND HIGHEST UNPUBLISHED ON THE TOP OF ARRAY
+  INPUT_ARRAY = SORT_ASC_PUBLISHED(INPUT_ARRAY) // SORT THE ARRAY IN ACSENDING ORDER WITH RESPECT TO PUBLISHED TALES FOR EACH ELEMENT
+  INPUT_ARRAY = SORT_DESC_UN_PUBLISHED(INPUT_ARRAY) // SORT THE IN DESCENDING ORDER WITH RESPECT TO NO OF TALES UNPUBLISHED
+  return INPUT_ARRAY;
+}
+
+INIT DATA = WRITER_DATA
+for (I=1;I<=31;I++) { ---> // RUNNING THIS LOOP FOR 31 DAYS
+  SET DATA = func(DATA, I)
+}
+
+
